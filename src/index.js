@@ -31,11 +31,11 @@ app.use(express.json())
 app.use('/api-docs', SwaggerUI.serve, SwaggerUI.setup(swaggerDocs));
 
 //Database Connection
-// mysql://gctzapmw_access_control:access_control@165.73.83.171:3306/gctzapmw_access_control_db
+// mysql://gctzapmw_access_control:password@host:3306/gctzapmw_access_control_db
 const connection = mysql.createConnection({
-    host: "165.73.83.171",
+    host: "host",
     user: "gctzapmw_access_control",
-    password: "access_control",
+    password: "password",
     database: "gctzapmw_access_control_db",
     connectionLimit: 10
 })

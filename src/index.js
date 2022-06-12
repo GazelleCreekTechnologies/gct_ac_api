@@ -1,8 +1,21 @@
 const express = require('express');
 
-const app = require('express')();
+const dotenv = require("dotenv");
+dotenv.config();
+const http = require("http");
+const cors = require("cors");
+const helmet = require("helmet");
+const compression = require("compression");
+
+const app = express();
+
+app.use(helmet());
+
+app.use(compression());
+
 const SwaggerJsDoc = require('swagger-jsdoc')
 const SwaggerUI = require('swagger-ui-express')
+app.use(cors({ origin: true }));
 
 // Load the MySQL pool connection
 const pool = require('./data/config');
@@ -35,7 +48,12 @@ const swaggerDocs = SwaggerJsDoc(swaggerOptions);
 
 app.use(express.json())
 app.use('/api-docs', SwaggerUI.serve, SwaggerUI.setup(swaggerDocs));
+app.options('*', cors()) // include before other routes
 
+//============================================= SCHEMA =================================
+
+
+  
 //============================================= GET =================================
 
 //Get All The User Details
@@ -56,7 +74,7 @@ app.get('/userdetails',(request, response) =>{
         if (err) {
             return err;
         }
-        response.send(result);
+        response.status(200).send(result);
     })
    
 });
@@ -79,10 +97,11 @@ app.get('/userdetails',(request, response) =>{
         if (err) {
             return err;
         }
-        response.send(result);
+        response.status(200).send(result);
     })
    
 });
+
 
 //============================================= UPDATE =================================
 
@@ -120,6 +139,38 @@ app.post('/test/:id',(req,res) =>{
 });
 
 //============================================= POST / INSERT =================================
+
+//Login Validation
+/**
+ * @swagger
+ * /login:
+ *  post:
+ *    description: validate the credentials
+ *    parameters:
+ *      - name: email
+ *        in: query
+ *        description: User Email
+ *        required: true
+ *      - name: password
+ *        in: query
+ *        description: User Password
+ *        required: true
+ *    responses:
+ *      '200':
+ *        description: A successful response
+ *      '404':
+ *        description: no credentials found
+ */
+ app.post('/login/:email',(request, response) =>{
+    console.log("Email:", email)
+    pool.query(`select * from VisitorTbl `,(err, result) => {
+        if (err) {
+            return err;
+        }
+        response.status(200).send(result);
+    })
+   
+});
 
 //============================================= DELETE ========================================
 

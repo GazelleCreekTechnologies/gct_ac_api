@@ -15,7 +15,11 @@ app.use(compression());
 
 const SwaggerJsDoc = require('swagger-jsdoc')
 const SwaggerUI = require('swagger-ui-express')
-app.use(cors({ origin: true }));
+app.use((request, response, next) => {
+    response.header("Access-Control-Allow-Origin", "*");
+    response.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next()
+});
 
 // Load the MySQL pool connection
 const pool = require('./data/config');
@@ -47,7 +51,7 @@ const swaggerOptions = {
 const swaggerDocs = SwaggerJsDoc(swaggerOptions);
 
 app.use(express.json())
-app.use('/api-docs', SwaggerUI.serve, SwaggerUI.setup(swaggerDocs));
+app.use('/docs', SwaggerUI.serve, SwaggerUI.setup(swaggerDocs));
 app.options('*', cors()) // include before other routes
 
 //============================================= SCHEMA =================================
@@ -122,7 +126,7 @@ app.get('/userdetails',(request, response) =>{
  *      '201':
  *        description: Successfully created user
  */
-app.post('/test/:id',(req,res) =>{
+app.put('/test/:id',(req,res) =>{
 
     const {id} = req.params;
     const {logo} = req.body;
@@ -140,31 +144,133 @@ app.post('/test/:id',(req,res) =>{
 
 //============================================= POST / INSERT =================================
 
-//Login Validation
+//Login Validation INSERT INTO gctzapmw_access_control_db.UserTbl
+//(tenantID, lastName, firstName, email, occupation, online, tagID, hours, temperature, `role`, gender, ethnicity, accessType, status, username, password, biometricID, faceID)
+//VALUES(NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL);
+
 /**
  * @swagger
  * /login:
  *  post:
+ *    summary: login
+ *    consumes:
+ *      - application/json
  *    description: validate the credentials
  *    parameters:
- *      - name: email
- *        in: query
- *        description: User Email
- *        required: true
- *      - name: password
- *        in: query
- *        description: User Password
- *        required: true
+ *      - in: body
+ *        name: user
+ *        description: Email and Password to match existing user
+ *        schema:
+ *            type: object
+ *            properties:
+ *               email: 
+ *                 type: string
+ *               password:
+ *                 type: string
  *    responses:
- *      '200':
+ *      '201':
  *        description: A successful response
  *      '404':
  *        description: no credentials found
  */
- app.post('/login/:email',(request, response) =>{
+
+ app.post('/login/',(request, response) =>{
+    const email =  request.body.email.value;
+    const password= request.body.password.value;
     console.log("Email:", email)
-    pool.query(`select * from VisitorTbl `,(err, result) => {
+    console.log("Password:",password)
+
+    pool.query(`select * from UserTbl where email=?`,email,(err, result) => {
+        console.log("Results:",result[0].password)
+
         if (err) {
+            console.log("err:", err)
+            return err;
+        }
+        if(result[0].password != password){
+            response.status(401).send("Unaurthorized, invalid password")
+        }
+        response.status(200).send(result);
+    })
+   
+});
+
+
+//============================================= POST / INSERT| [ UserTbl ] =================================
+
+/**
+ * @swagger
+ * /registeruser:
+ *  post:
+ *    summary: populate userTbl
+ *    consumes:
+ *      - application/json
+ *    description: add a new user / registration
+ *    parameters:
+ *      - in: body
+ *        name: user
+ *        description: Register a new user
+ *        schema:
+ *            type: object
+ *            properties:  
+ *               lastName: 
+ *                 type: string
+ *               firstName:
+ *                 type: string
+ *               email: 
+ *                 type: string
+ *               occupation:
+ *                 type: string
+ *               online: 
+ *                 type: integer
+ *               tagID:
+ *                 type: string
+ *               gender: 
+ *                 type: string
+ *               ethnicity:
+ *                 type: string
+ *               username: 
+ *                 type: string
+ *               biometricID:
+ *                 type: string
+ *               faceID: 
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               tenantID:
+ *                 type: integer
+ *    responses:
+ *      '201':
+ *        description: A successful response
+ *      '404':
+ *        description: no credentials found
+ */
+
+ app.post('/registeruser/',(request, response) =>{
+    const tenantID= request.body.tenantID;
+    const email =  request.body.email;
+    const password= request.body.password;
+    const lastName =  request.body.lastName;
+    const firstName =  request.body.firstName;
+    const occupation =  request.body.occupation;
+    const online =  request.body.online;
+    const tagID =  request.body.tagID;
+    const gender =  request.body.gender;
+    const ethnicity =  request.body.ethnicity;
+    const username =  request.body.username;
+    const biometricID =  request.body.biometricID;
+    const faceID =  request.body.faceID;
+    const defaultZero = 0
+    console.log(request.body)
+    var sql = `INSERT INTO UserTbl
+    (tenantID, lastName, firstName, email, occupation, online, tagID, hours, temperature, gender, ethnicity, accessType, status, username, password, biometricID, faceID) VALUES 
+    (${tenantID}, '${lastName}', '${firstName}', '${email}', '${occupation}', ${online}, '${tagID}', '${defaultZero}', ${defaultZero}, '${gender}', '${ethnicity}', ${defaultZero}, ${defaultZero}, '${username}', '${password}', '${biometricID}',' ${faceID}') `;
+
+    pool.query(sql,(err, result) => {
+        console.log("Results:",result)
+
+        if (err) {
+            console.log("err:", err)
             return err;
         }
         response.status(200).send(result);

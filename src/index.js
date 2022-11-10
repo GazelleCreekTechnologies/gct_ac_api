@@ -107,6 +107,32 @@ app.get('/userdetails',(request, response) =>{
 });
 
 
+
+//Get All The Visitors
+/**
+ * @swagger
+ * /visitor/:visitorId:
+ *  get:
+ *    description: Get all the visitor details from the VisitorTbl
+ *    responses:
+ *      '200':
+ *        description: A successful response
+ *      '404':
+ *        description: no visitors found response
+ */
+ app.get('/visitors',(request, response) =>{
+    const { visitorId } = request.params;
+
+    pool.query(`select * from VisitorTbl where visitorID=?`,visitorId, (err, result) => {
+        if (err) {
+            return err;
+        }
+        response.status(200).send(result);
+    })
+   
+});
+
+
 //============================================= UPDATE =================================
 
 /**
@@ -278,6 +304,199 @@ app.put('/test/:id',(req,res) =>{
    
 });
 
+//============================================= BUCKETS ========================================
+
+//============================================= GET ========================================
+
+//Get A specific bucket info.
+/**
+ * @swagger
+ * /buckets/:userId:
+ *  get:
+ *    summary: Get bucket info
+ *    consumes:
+ *      - application/json
+ *    description: Get the specific bucket from the GyserTbl
+ *    parameters:
+ *      - in: path
+ *        name: userId
+ *    responses:
+ *      '200':
+ *        description: A successful response
+ *      '404':
+ *        description: no visitors found response
+ */
+ app.get('/buckets/:userId',(request, response) =>{
+    const { userId } = request.params;
+
+    pool.query(`select * from GyserTbl gt WHERE gt.userId=?`,userId, (err, result) => {
+        if (err) {
+            return err;
+        }
+        response.status(200).send(result);
+    })   
+});
+
+//============================================= POST BUCKET ========================================
+
+
+/**
+ * @swagger
+ * /updatebucket:
+ *  put:
+ *    summary: updatebucket gyser
+ *    consumes:
+ *      - application/json
+ *    description: update bucket temperature and scheduling
+ *    parameters:
+ *      - in: body
+ *        name: bucket
+ *        description: update bucket temperature and scheduling
+ *        schema:
+ *            type: object
+ *            properties:
+ *               userId: 
+ *                 type: integer
+ *               currentTemp:
+ *                 type: integer
+ *               limitTemp:
+ *                 type: integer
+ *               scheduleTime:
+ *                 type: number
+ *    responses:
+ *      '201':
+ *        description: A successful response
+ *      '404':
+ *        description: no credentials found
+ */
+
+ app.put('/updatebucket',(request, response) =>{
+    const userId =  request.body.userId;
+    const currentTemp= request.body.currentTemp;
+    const limitTemp =  request.body.limitTemp;
+    const scheduleTime= request.body.scheduleTime;
+
+    console.log(request.body)
+    var sql = `UPDATE GyserTbl
+    SET  currentTemp=${currentTemp}, limitTemp=${limitTemp}, scheduleTime=${scheduleTime}
+    WHERE userId=${userId} `;
+
+    pool.query(sql,(err, result) => {
+        console.log("Results:",result)
+
+        if (err) {
+            console.log("err:", err)
+            return err;
+        }
+        response.status(200).send(result);
+    })
+   
+});
+
+
+//============================================= UPDATE CURRENT TEMP BUCKET ========================================
+
+
+/**
+ * @swagger
+ * /setcurrenttemp/:currentTemp/:userId:
+ *  put:
+ *    summary: update current temperature gyser
+ *    consumes:
+ *      - application/json
+ *    description: update bucket CURRENT temperature
+ *    parameters:
+ *      - in: query
+ *        name: currentTemp
+ *      - in: query
+ *        name: userId
+ *        description: update bucket CURRENT temperature
+ *        schema:
+ *          properties:
+ *            userId: 
+ *              type: integer
+ *            currentTemp:
+ *              type: integer
+ *    responses:
+ *      '201':
+ *        description: A successful update of temperature response
+ *      '404':
+ *        description: failed to update temperature
+ */
+
+ app.put('/setcurrenttemp/:currentTemp/:userId',(request, response) =>{
+    const { currentTemp } = request.params;
+    const { userId } = request.params;
+
+    console.log("\n\n\nRequest param: ",request.params)
+    console.log("\n\n\ncurrentTemp: ", currentTemp)
+
+    var sql = `UPDATE GyserTbl
+    SET  currentTemp=${currentTemp}
+    WHERE userId=${userId} `;
+
+    pool.query(sql,(err, result) => {
+        console.log("Results:",result)
+
+        if (err) {
+            console.log("err:", err)
+            return err;
+        }
+        response.status(201).send(result);
+    })
+   
+});
+
+
+/**
+ * @swagger
+ * /setlimittemp/:limitTemp/:userId:
+ *  put:
+ *    summary: update limit temperature gyser
+ *    consumes:
+ *      - application/json
+ *    description: update bucket MAXIMUM temperature
+ *    parameters:
+ *      - in: query
+ *        name: maxTemperature
+ *      - in: query
+ *        name: userId
+ *        description: update bucket CURRENT temperature
+ *        schema:
+ *          properties:
+ *            userId: 
+ *              type: integer
+ *            currentTemp:
+ *              type: integer
+ *    responses:
+ *      '201':
+ *        description: A successful update of temperature response
+ *      '404':
+ *        description: failed to update temperature
+ */
+
+ app.put('/setlimittemp/:limitTemp/:userId',(request, response) =>{
+    const { limitTemp } = request.params;
+    const { userId } = request.params;
+
+    console.log("\n\n\nRequest param: ",request.params)
+    console.log("\n\n\limitTemp: ", limitTemp)
+
+    var sql = `UPDATE GyserTbl
+    SET  limitTemp=${limitTemp}
+    WHERE userId=${userId} `;
+
+    pool.query(sql,(err, result) => {
+        console.log("Results:",result)
+
+        if (err) {
+            console.log("err:", err)
+            return err;
+        }
+        response.status(201).send(result);
+    })
+   
+});
 //============================================= DELETE ========================================
 
 //============================================= START =========================================

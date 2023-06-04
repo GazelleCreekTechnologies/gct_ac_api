@@ -500,7 +500,7 @@ app.put('/test/:id',(req,res) =>{
 
 /**
  * @swagger
- * /scheduletime/:time/:userId:
+ * /scheduletime/:scheduleTime/:userId:
  *  put:
  *    summary: update schedule time to start-up gyser
  *    consumes:
@@ -516,7 +516,7 @@ app.put('/test/:id',(req,res) =>{
  *          properties:
  *            userId: 
  *              type: integer
- *            time:
+ *            scheduleTime:
  *              type: string
  *    responses:
  *      '201':
@@ -525,7 +525,7 @@ app.put('/test/:id',(req,res) =>{
  *        description: failed to update temperature
  */
 
-app.put('/scheduletime/:time/:userId',(request, response) =>{
+app.put('/scheduletime/:scheduleTime/:userId',(request, response) =>{
     const { scheduleTime } = request.params;
     const { userId } = request.params;
 

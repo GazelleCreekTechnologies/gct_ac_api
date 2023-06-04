@@ -497,6 +497,56 @@ app.put('/test/:id',(req,res) =>{
     })
    
 });
+
+/**
+ * @swagger
+ * /scheduletime/:time/:userId:
+ *  put:
+ *    summary: update schedule time to start-up gyser
+ *    consumes:
+ *      - application/json
+ *    description: update bucket TIME temperature
+ *    parameters:
+ *      - in: query
+ *        name: timeScheduled
+ *      - in: query
+ *        name: userId
+ *        description: update bucket TIME temperature
+ *        schema:
+ *          properties:
+ *            userId: 
+ *              type: integer
+ *            time:
+ *              type: string
+ *    responses:
+ *      '201':
+ *        description: A successful update of temperature response
+ *      '404':
+ *        description: failed to update temperature
+ */
+
+app.put('/scheduletime/:time/:userId',(request, response) =>{
+    const { scheduleTime } = request.params;
+    const { userId } = request.params;
+
+    console.log("\n\n\nRequest param: ",request.params)
+    console.log("\n\n\scheduleTime: ", scheduleTime)
+
+    var sql = `UPDATE GyserTbl
+    SET  scheduleTime=${scheduleTime}
+    WHERE userId=${userId} `;
+
+    pool.query(sql,(err, result) => {
+        console.log("Results:",result)
+
+        if (err) {
+            console.log("err:", err)
+            return err;
+        }
+        response.status(201).send(result);
+    })
+   
+});
 //============================================= DELETE ========================================
 
 //============================================= START =========================================

@@ -6,11 +6,12 @@ const http = require("http");
 const cors = require("cors");
 const helmet = require("helmet");
 const compression = require("compression");
+const {readdirSync} = require("fs")
 
 const app = express();
 
 app.use(helmet());
-
+app.use(cors())
 app.use(compression());
 
 const SwaggerJsDoc = require('swagger-jsdoc')
@@ -20,7 +21,7 @@ app.use((request, response, next) => {
     response.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     next()
 });
-
+//readdirSync("./routes").map((file)=>app.use("/",require("./routes/"+file)))
 // Load the MySQL pool connection
 const pool = require('./data/config');
 

@@ -480,9 +480,6 @@ app.put('/test/:id',(req,res) =>{
     const { limitTemp } = request.params;
     const { userId } = request.params;
 
-    console.log("\n\n\nRequest param: ",request.params)
-    console.log("\n\n\limitTemp: ", limitTemp)
-
     var sql = `UPDATE GyserTbl
     SET  limitTemp=${limitTemp}
     WHERE userId=${userId} `;
@@ -531,9 +528,6 @@ app.put('/scheduletime/:scheduleTime/:userId',(request, response) =>{
     const { scheduleTime } = request.params;
     const { userId } = request.params;
 
-    console.log("\n\n\nRequest param: ",request.params)
-    console.log("\n\n\scheduleTime: ", scheduleTime)
-
     var sql = `UPDATE GyserTbl
     SET  scheduleTime=${scheduleTime}
     WHERE userId=${userId} `;
@@ -550,6 +544,52 @@ app.put('/scheduletime/:scheduleTime/:userId',(request, response) =>{
    
 });
 //============================================= DELETE ========================================
+
+//============================================= UPDATE TIMER SCHEDULE ========================================
+
+/**
+ * @swagger
+ * /toggle-schedule:
+ *  put:
+ *    summary: utoggle schedule time gyser
+ *    consumes:
+ *      - application/json
+ *    description: update whether to schedule or not
+ *    parameters:
+ *      - in: query
+ *        name: userId
+ *        description: update bucket TIME temperature
+ *        schema:
+ *          properties:
+ *            userId: 
+ *              type: integer
+ *    responses:
+ *      '201':
+ *        description: A successful update of temperature response
+ *      '404':
+ *        description: failed to update temperature
+ */
+
+app.put('/toggle-schedule/:userId',(request, response) =>{
+    const { userId } = request.params;
+
+    var sql = `UPDATE GyserTbl
+    SET  isSchedule = NOT isSchedule
+    WHERE userId=${userId} `;
+
+    pool.query(sql,(err, result) => {
+        console.log("Results:",result)
+
+        if (err) {
+            console.log("err:", err)
+            return err;
+        }
+        response.status(201).send(result);
+    })
+   
+});
+
+
 
 //============================================= START =========================================
 app.listen(PORT, () => { 
